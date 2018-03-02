@@ -1,10 +1,15 @@
 #pragma once
-#define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
 
-namespace Ui {
-class MainWindow;
+#include "server.h"
+#include "client.h"
+#include "ui_mainwindow.h"
+
+namespace Ui
+{
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -12,9 +17,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = Q_NULLPTR);
     ~MainWindow();
 
 private:
     Ui::MainWindow *ui;
+    Server *serverWindow;
+    Client *clientWindow;
+
+    void clientPressed();
+    void serverPressed();
 };
