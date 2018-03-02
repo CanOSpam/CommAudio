@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QMessageBox>
 
 #include "server.h"
 #include "client.h"
@@ -23,7 +24,9 @@ public:
 private:
     Ui::MainWindow *ui;
     Server *serverWindow;
-    Client *clientWindow;
+    Client *clientWindow[32];
+    int maxClients;
+    int currClients;
 
     void clientPressed();
     void serverPressed();

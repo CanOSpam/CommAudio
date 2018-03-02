@@ -7,6 +7,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    maxClients = 2;
+    currClients = 0;
+
+    for(int i = 0; i < maxClients; i++)
+    {
+        clientWindow[i] = Q_NULLPTR;
+    }
+
     connect(ui->clientButton, &QPushButton::clicked, this, &MainWindow::clientPressed);
     connect(ui->serverButton, &QPushButton::clicked, this, &MainWindow::serverPressed);
 }
@@ -14,7 +22,13 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete clientWindow;
+    for(int i = 0; i < maxClients; i++)
+    {
+        if(clientWindow[i] != Q_NULLPTR)
+        {
+            delete clientWindow[i];
+        }
+    }
     delete serverWindow;
 }
 
@@ -27,6 +41,18 @@ void MainWindow::serverPressed()
 
 void MainWindow::clientPressed()
 {
-    clientWindow = new Client();
-    clientWindow->show();
+    if(currClients <= maxClients)
+    {
+        clientWindow[currClients] = new Client();
+        clientWindow[currClients]->show();
+        currClients++;
+    }
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Maximum number of clients reached.");
+        msgBox.setWindowTitle("Information");
+        msgBox.exec();
+    }
 }
