@@ -19,4 +19,5 @@ public:
 private:
     Ui::Server *ui;
     QTcpServer *tcpServer;
+    QString fileNames;
 };

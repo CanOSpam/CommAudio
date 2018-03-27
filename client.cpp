@@ -11,6 +11,7 @@ Client::Client(QWidget *parent)
 
     tcpSocket->abort();
     tcpSocket->connectToHost(QHostAddress("192.168.56.1"),4242);
+    in.setDevice(tcpSocket);
 }
 
 Client::~Client()
@@ -20,7 +21,8 @@ Client::~Client()
 
 void Client::readData()
 {
-
+    QString data(tcpSocket->readAll());
+    qDebug(qPrintable(data));
 }
 
 void Client::displayError(QAbstractSocket::SocketError socketError)

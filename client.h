@@ -22,4 +22,5 @@ public:
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;
+    QTextStream in;
 };
