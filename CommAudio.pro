@@ -28,13 +28,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     server.cpp \
-    client.cpp
+    client.cpp \
+    streamthread.cpp
 
 HEADERS += \
         mainwindow.h \
     server.h \
     server.h \
-    client.h
+    client.h \
+    streamthread.h
 
 FORMS += \
         mainwindow.ui \

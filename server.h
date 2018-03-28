@@ -1,5 +1,6 @@
 #pragma once
 #include "ui_server.h"
+#include "streamthread.h"
 #include <QtNetwork>
 #include <QWidget>
 
@@ -22,4 +23,5 @@ private:
     QTcpServer *tcpServer;
     QString fileNames;
     QFileInfoList streamList;
+    QList <StreamThread*> *streamThreadList;
 };
