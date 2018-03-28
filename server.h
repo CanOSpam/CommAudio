@@ -15,9 +15,11 @@ public:
     Server(QWidget *parent = Q_NULLPTR);
     ~Server();
     addClient();
+    void readData();
 
 private:
     Ui::Server *ui;
     QTcpServer *tcpServer;
     QString fileNames;
+    QFileInfoList streamList;
 };

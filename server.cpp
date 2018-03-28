@@ -7,7 +7,7 @@ Server::Server(QWidget *parent)
     ui->setupUi(this);
 
     QDir *dataDir = new QDir(QDir::homePath());
-    QFileInfoList streamList = dataDir->entryInfoList();
+    streamList = dataDir->entryInfoList();
     for(int i = 0; i < streamList.size(); i++)
     {
         if (streamList[i].absoluteFilePath().contains("Music"))
@@ -66,7 +66,29 @@ Server::addClient()
 {
     QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
     connect(clientConnection, &QAbstractSocket::disconnected, clientConnection, &QObject::deleteLater);
+    connect(clientConnection, &QIODevice::readyRead, this, &Server::readData);
     qDebug("Client connected.\n");
-    clientConnection->write(qPrintable(fileNames));
+    QString header = "0";
+    header.append(fileNames);
+    clientConnection->write(qPrintable(header));
     return 0;
 }
+
+void Server::readData()
+{
+    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender()); if (socket == 0) return;
+    QString data(socket->readAll());
+    if (data[0] == '1')
+    {
+        data = data.remove(0,1);
+        for (int i = 0; i < streamList.size(); i++)
+        {
+            if (streamList[i].absoluteFilePath().contains(data))
+            {
+                QString s = streamList[i].absoluteFilePath();
+                qDebug(qPrintable(s));
+            }
+        }
+    }
+}
+

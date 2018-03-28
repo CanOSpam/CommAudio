@@ -19,8 +19,10 @@ public:
     void readData();
     void displayError(QAbstractSocket::SocketError socketError);
 
+private slots:
+    void on_playButton_clicked();
+
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;
-    QTextStream in;
 };
