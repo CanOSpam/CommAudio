@@ -20,18 +20,48 @@ Client::~Client()
 
 void Client::readData()
 {
-    QString data(tcpSocket->readAll());
+    data = tcpSocket->readAll();
     if (data[0] == '0')
     {
-        data = data.remove(0,1);
-        QList<QString> streamList = data.split(QRegExp(";|/"));
+        QString *list = new QString(data);
+        QString fileString = list->remove(0,1);
+        QList<QString> streamList = fileString.split(QRegExp(";|/"));
         for (int i = 0; i <streamList.size(); i++)
         {
-            if (streamList[i].contains(".mp3"))
+            if (streamList[i].contains(".wav") || streamList[i].contains(".mp3"))
             {
                 ui->streamComboBox->addItem(streamList[i]);
             }
         }
+    }
+
+    if (data[0] == '2')
+    {
+        data = data.remove(0,1);
+        file.setFileName("./test.wav");
+        file.open(QIODevice::WriteOnly);
+        file.write(data);
+        file.close();
+        file.open(QIODevice::ReadOnly);
+        QAudioOutput* audio;
+        QAudioFormat format;
+        format.setSampleRate(44100);
+        format.setChannelCount(1);
+        format.setSampleSize(16);
+        format.setCodec("audio/pcm");
+        format.setByteOrder(QAudioFormat::LittleEndian);
+        format.setSampleType(QAudioFormat::SignedInt);
+
+        QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+        if (!info.isFormatSupported(format)) {
+            qWarning() << "Default format not supported - trying to use nearest";
+            format = info.nearestFormat(format);
+        }
+        audio = new QAudioOutput(format, this);
+        /*buffer = new QBuffer(&data);
+        audio->setBufferSize(1024);
+        buffer->open(QIODevice::ReadOnly);*/
+        audio->start(&file);
     }
 }
 

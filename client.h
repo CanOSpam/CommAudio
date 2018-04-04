@@ -3,6 +3,9 @@
 #include <QtNetwork>
 #include <QHostAddress>
 #include <QWidget>
+#include <QAudioInput>
+#include <QAudioOutput>
+#include <QBuffer>
 
 namespace Ui
 {
@@ -25,4 +28,7 @@ private slots:
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;
+    QByteArray data;
+    QBuffer *buffer;
+    QFile file;
 };

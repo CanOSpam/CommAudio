@@ -1,8 +1,9 @@
 #pragma once
 #include "ui_server.h"
-#include "streamthread.h"
 #include <QtNetwork>
 #include <QWidget>
+#include <QAudioInput>
+#include <QAudioOutput>
 
 namespace Ui
 {
@@ -23,5 +24,4 @@ private:
     QTcpServer *tcpServer;
     QString fileNames;
     QFileInfoList streamList;
-    QList <StreamThread*> *streamThreadList;
 };

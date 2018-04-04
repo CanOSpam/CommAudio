@@ -6,6 +6,7 @@
 
 QT       += core gui
 QT       += network
+QT       += multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -28,15 +29,13 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     server.cpp \
-    client.cpp \
-    streamthread.cpp
+    client.cpp
 
 HEADERS += \
         mainwindow.h \
     server.h \
     server.h \
-    client.h \
-    streamthread.h
+    client.h
 
 FORMS += \
         mainwindow.ui \

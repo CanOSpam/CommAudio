@@ -5,7 +5,6 @@ Server::Server(QWidget *parent)
     , ui(new Ui::Server)
 {
     ui->setupUi(this);
-    streamThreadList = new QList<StreamThread*>();
 
     QDir *dataDir = new QDir(QDir::homePath());
     streamList = dataDir->entryInfoList();
@@ -68,8 +67,9 @@ Server::addClient()
     QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
     connect(clientConnection, &QAbstractSocket::disconnected, clientConnection, &QObject::deleteLater);
     connect(clientConnection, &QIODevice::readyRead, this, &Server::readData);
-    QString header = "0";
-    header.append(fileNames);
+
+    QByteArray header = fileNames.toUtf8();
+    header.prepend('0');
     clientConnection->write(qPrintable(header));
     return 0;
 }
@@ -85,14 +85,20 @@ void Server::readData()
         {
             if (streamList[i].absoluteFilePath().contains(data))
             {
-                QString s = streamList[i].absoluteFilePath();
+                QFile *streamFile = new QFile(streamList[i].absoluteFilePath());
+                if (!streamFile->open(QIODevice::ReadOnly))
+                {
+                    return;
+                }
 
-                StreamThread *sThread = new StreamThread(socket, streamList[i]);
-                streamThreadList->append(sThread);
-                sThread->start();
+                QByteArray content = streamFile->readAll();
+                content.prepend('2');
+                socket->write(content);
+
+                streamFile->close();
+
                 break;
             }
         }
     }
 }
-
