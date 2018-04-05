@@ -91,12 +91,13 @@ void Server::readData()
                     return;
                 }
 
-                QByteArray content = streamFile->readAll();
-                content.prepend('2');
-                socket->write(content);
-
+                while(!streamFile->atEnd())
+                {
+                    QByteArray content = streamFile->readLine();
+                    content.prepend('2');
+                    socket->write(content);
+                }
                 streamFile->close();
-
                 break;
             }
         }

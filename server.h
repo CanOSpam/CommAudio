@@ -24,4 +24,7 @@ private:
     QTcpServer *tcpServer;
     QString fileNames;
     QFileInfoList streamList;
+    QFile file;
+    QAudioOutput* audio;
+
 };

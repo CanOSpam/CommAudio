@@ -29,6 +29,8 @@ private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;
     QByteArray data;
-    QBuffer *buffer;
-    QFile file;
+    QFile fileWrite;
+    QFile fileRead;
+    QAudioOutput* audio;
+    bool newFile = true;
 };

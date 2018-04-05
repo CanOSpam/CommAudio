@@ -38,30 +38,38 @@ void Client::readData()
     if (data[0] == '2')
     {
         data = data.remove(0,1);
-        file.setFileName("./test.wav");
-        file.open(QIODevice::WriteOnly);
-        file.write(data);
-        file.close();
-        file.open(QIODevice::ReadOnly);
-        QAudioOutput* audio;
-        QAudioFormat format;
-        format.setSampleRate(44100);
-        format.setChannelCount(1);
-        format.setSampleSize(16);
-        format.setCodec("audio/pcm");
-        format.setByteOrder(QAudioFormat::LittleEndian);
-        format.setSampleType(QAudioFormat::SignedInt);
-
-        QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
-        if (!info.isFormatSupported(format)) {
-            qWarning() << "Default format not supported - trying to use nearest";
-            format = info.nearestFormat(format);
+        fileWrite.setFileName("./test.wav");
+        if(!fileWrite.isOpen())
+        {
+            fileWrite.open(QIODevice::WriteOnly | QIODevice::Append);
         }
-        audio = new QAudioOutput(format, this);
-        /*buffer = new QBuffer(&data);
-        audio->setBufferSize(1024);
-        buffer->open(QIODevice::ReadOnly);*/
-        audio->start(&file);
+        fileWrite.write(data);
+        fileWrite.close();
+        if (newFile)
+        {
+            newFile = false;
+            fileRead.setFileName("./test.wav");
+            if(!fileRead.isOpen())
+            {
+                fileRead.open(QIODevice::ReadOnly);
+            }
+            QAudioFormat format;
+            format.setSampleRate(44100);
+            format.setChannelCount(1);
+            format.setSampleSize(16);
+            format.setCodec("audio/pcm");
+            format.setByteOrder(QAudioFormat::LittleEndian);
+            format.setSampleType(QAudioFormat::SignedInt);
+
+            QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+            if (!info.isFormatSupported(format)) {
+                qWarning() << "Default format not supported - trying to use nearest";
+                format = info.nearestFormat(format);
+            }
+            audio = new QAudioOutput(format, this);
+            audio->start(&fileRead);
+            fileRead.close();
+        }
     }
 }
 
