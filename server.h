@@ -23,6 +23,7 @@ private:
     Ui::Server *ui;
     QTcpServer *tcpServer;
     QString fileNames;
+    QList<QTcpSocket*> clientList;
     QFileInfoList streamList;
     QFile file;
     QAudioOutput* audio;

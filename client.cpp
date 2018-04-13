@@ -10,6 +10,30 @@ Client::Client(QWidget *parent)
     connect(tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Client::displayError);
 
     tcpSocket->abort();
+
+    // The clients server for peer requests
+    tcpServer = new QTcpServer(this);
+    if (!tcpServer->listen(QHostAddress::Any, 8484))
+    {
+        close();
+        return;
+    }
+    QString ipAddress;
+    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
+    // use the first non-localhost IPv4 address
+    for (int i = 0; i < ipAddressesList.size(); ++i) {
+        if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
+            ipAddressesList.at(i).toIPv4Address()) {
+            ipAddress = ipAddressesList.at(i).toString();
+            break;
+        }
+    }
+    // if we did not find one, use IPv4 localhost
+    if (ipAddress.isEmpty())
+        ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+    connect(tcpServer, &QTcpServer::newConnection, this, &Client::peerConnRequest);
+    qDebug("The client server is running on\n\nIP: %s\nport: %d\n\n", qPrintable(ipAddress), tcpServer->serverPort());
+
     tcpSocket->connectToHost(QHostAddress("192.168.56.1"),4242);
 }
 
@@ -25,17 +49,33 @@ void Client::readData()
     {
         QString *list = new QString(data);
         QString fileString = list->remove(0,1);
-        QList<QString> streamList = fileString.split(QRegExp(";|/"));
+        QList<QString> streamList = fileString.split(QRegExp(";"));
         for (int i = 0; i <streamList.size(); i++)
         {
-            if (streamList[i].contains(".wav") || streamList[i].contains(".mp3"))
+            if (streamList[i].contains("/"))
             {
-                ui->streamComboBox->addItem(streamList[i]);
+                QList<QString> sList = streamList[i].split("/");
+                for (int i = 0; i < sList.size(); i++)
+                {
+                    if (sList[i].contains(".wav") || sList[i].contains(".mp3"))
+                    {
+                        ui->streamComboBox->addItem(sList[i]);
+                    }
+                }
             }
+            else if (streamList[i].compare("1"))
+            {
+                for (int j = i; j < streamList.size() - 1;j++)
+                {
+                    ui->ipComboBox->addItem(streamList[j]);
+                }
+                break;
+            }
+
         }
     }
 
-    if (data[0] == '2')
+    else if (data[0] == '3')
     {
         data = data.remove(0,1);
         fileWrite.setFileName("./test.wav");
@@ -91,7 +131,24 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 
 void Client::on_playButton_clicked()
 {
-    QString header = "1";
+    QString header = "2";
     header.append(ui->streamComboBox->currentText());
     tcpSocket->write(qPrintable(header));
+}
+
+void Client::on_connectButton_clicked()
+{
+    QString ipText = ui->ipComboBox->currentText();
+    tcpSocket->connectToHost(QHostAddress(ipText),4242);
+}
+
+Client::peerConnRequest()
+{
+    if (peerSocket == NULL)
+    {
+        peerSocket = tcpServer->nextPendingConnection();
+        connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
+        connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
+    }
+    return 0;
 }
