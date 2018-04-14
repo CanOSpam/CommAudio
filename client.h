@@ -6,6 +6,7 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QBuffer>
+#include <QMessageBox>
 
 namespace Ui
 {
@@ -27,6 +28,12 @@ private slots:
     void on_playButton_clicked();
 
     void on_connectButton_clicked();
+
+    void on_disconnectButton_clicked();
+
+    void ConnectBack();
+
+    void RunMessageBox(QString ipAddress);
 
 private:
     Ui::Client *ui;

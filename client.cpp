@@ -139,7 +139,18 @@ void Client::on_playButton_clicked()
 void Client::on_connectButton_clicked()
 {
     QString ipText = ui->ipComboBox->currentText();
-    tcpSocket->connectToHost(QHostAddress(ipText),4242);
+    tcpSocket->connectToHost(QHostAddress(ipText),8484);
+    qDebug() << "Client Connected";
+}
+
+void Client::on_disconnectButton_clicked()
+{
+    // Check if the socket is connected if it is disconnect
+    if (tcpSocket->state() == QAbstractSocket::ConnectedState)
+    {
+
+    }
+    qDebug() << "Client Disconnected";
 }
 
 int Client::peerConnRequest()
@@ -149,6 +160,24 @@ int Client::peerConnRequest()
         peerSocket = tcpServer->nextPendingConnection();
         connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
         connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
+        RunMessageBox("test");
     }
     return 0;
 }
+
+// Message Box When A client connects peer to peer for microphone
+void Client::RunMessageBox(QString ipAddress)
+{
+    QMessageBox acceptConn;
+    acceptConn.setText("You have received a p2p microphone request from: " + ipAddress);
+    acceptConn.setInformativeText("Accept Connection?");
+    acceptConn.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    connect(&acceptConn, SIGNAL(buttonClicked(QMessageBox::Ok)),this,SLOT(ConnectBack()));
+}
+
+// Connects back to the client if the
+void Client::ConnectBack()
+{
+    qDebug() << "Connected Back!";
+}
+
