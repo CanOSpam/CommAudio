@@ -100,18 +100,19 @@ void Server::readData()
         {
             if (streamList[i].absoluteFilePath().contains(data))
             {
+                QByteArray content;
+                content.prepend('3');
+                socket->write(content);
+
                 QFile *streamFile = new QFile(streamList[i].absoluteFilePath());
                 if (!streamFile->open(QIODevice::ReadOnly))
                 {
                     return;
                 }
+                dataStream = new QDataStream(socket);
 
-                while(!streamFile->atEnd())
-                {
-                    QByteArray content = streamFile->readLine();
-                    content.prepend('3');
-                    socket->write(content);
-                }
+                content = streamFile->readAll();
+                *dataStream << content;
                 streamFile->close();
                 break;
             }

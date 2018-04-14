@@ -11,6 +11,20 @@ Client::Client(QWidget *parent)
 
     tcpSocket->abort();
 
+    format.setSampleRate(96000);
+    format.setChannelCount(1);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::SignedInt);
+
+    QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+    if (!info.isFormatSupported(format)) {
+        qWarning() << "Default format not supported - trying to use nearest";
+        format = info.nearestFormat(format);
+    }
+    audio = new QAudioOutput(format, this);
+
     // The clients server for peer requests
     tcpServer = new QTcpServer(this);
     if (!tcpServer->listen(QHostAddress::Any, 8484))
@@ -44,74 +58,76 @@ Client::~Client()
 
 void Client::readData()
 {
-    data = tcpSocket->readAll();
-    if (data[0] == '0')
+    if (!streaming)
     {
-        QString *list = new QString(data);
-        QString fileString = list->remove(0,1);
-        QList<QString> streamList = fileString.split(QRegExp(";"));
-        for (int i = 0; i <streamList.size(); i++)
+        // List of choices for client
+        data = tcpSocket->readAll();
+        if (data[0] == '0')
         {
-            if (streamList[i].contains("/"))
+            QString *list = new QString(data);
+            QString fileString = list->remove(0,1);
+            QList<QString> streamList = fileString.split(QRegExp(";"));
+            for (int i = 0; i <streamList.size(); i++)
             {
-                QList<QString> sList = streamList[i].split("/");
-                for (int i = 0; i < sList.size(); i++)
+                if (streamList[i].contains("/"))
                 {
-                    if (sList[i].contains(".wav") || sList[i].contains(".mp3"))
+                    QList<QString> sList = streamList[i].split("/");
+                    for (int i = 0; i < sList.size(); i++)
                     {
-                        ui->streamComboBox->addItem(sList[i]);
+                        if (sList[i].contains(".wav") || sList[i].contains(".mp3"))
+                        {
+                            ui->streamComboBox->addItem(sList[i]);
+                        }
                     }
                 }
-            }
-            else if (streamList[i].compare("1"))
-            {
-                for (int j = i; j < streamList.size() - 1;j++)
+                else if (streamList[i].compare("1"))
                 {
-                    ui->ipComboBox->addItem(streamList[j]);
+                    for (int j = i; j < streamList.size() - 1;j++)
+                    {
+                        ui->ipComboBox->addItem(streamList[j]);
+                    }
+                    break;
                 }
-                break;
-            }
 
+            }
         }
+
+        // File data to play
+        else if (data[0] == '3')
+        {
+            streaming = true;
+    //        data = data.remove(0,1);
+    //        if(!fileWrite.isOpen())
+    //        {
+    //            fileWrite.open(QIODevice::ReadWrite | QIODevice::Append);
+    //        }
+    //        fileWrite.write(data);
+        }
+        //End of file
+    //    else if (data[0] == '4')
+    //    {
+    //        fileWrite.close();
+    //        fileRead.setFileName("./" + filename);
+    //        if(!fileRead.isOpen())
+    //        {
+    //            fileRead.open(QIODevice::ReadOnly);
+    //            qDebug("Opening fileRead\n");
+    //        }
+
+    //        audio = new QAudioOutput(format, this);
+    //        audio->start(&fileRead);
+    //    }
     }
-
-    else if (data[0] == '3')
+    else
     {
-        data = data.remove(0,1);
-        fileWrite.setFileName("./test.wav");
-        if(!fileWrite.isOpen())
+//        fileWrite.write(data);
+        if (audio->state() == QAudio::IdleState || audio->state() == QAudio::StoppedState)
         {
-            fileWrite.open(QIODevice::WriteOnly | QIODevice::Append);
-        }
-        fileWrite.write(data);
-        fileWrite.close();
-        if (newFile)
-        {
-            newFile = false;
-            fileRead.setFileName("./test.wav");
-            if(!fileRead.isOpen())
-            {
-                fileRead.open(QIODevice::ReadOnly);
-            }
-            QAudioFormat format;
-            format.setSampleRate(44100);
-            format.setChannelCount(1);
-            format.setSampleSize(16);
-            format.setCodec("audio/pcm");
-            format.setByteOrder(QAudioFormat::LittleEndian);
-            format.setSampleType(QAudioFormat::SignedInt);
-
-            QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
-            if (!info.isFormatSupported(format)) {
-                qWarning() << "Default format not supported - trying to use nearest";
-                format = info.nearestFormat(format);
-            }
-            audio = new QAudioOutput(format, this);
-            audio->start(&fileRead);
-            fileRead.close();
+            audio->start(tcpSocket);
         }
     }
 }
+
 
 void Client::displayError(QAbstractSocket::SocketError socketError)
 {
@@ -133,6 +149,9 @@ void Client::on_playButton_clicked()
 {
     QString header = "2";
     header.append(ui->streamComboBox->currentText());
+    filename = ui->streamComboBox->currentText();
+    fileWrite.setFileName("./" + filename);
+
     tcpSocket->write(qPrintable(header));
 }
 
@@ -149,6 +168,18 @@ Client::peerConnRequest()
         peerSocket = tcpServer->nextPendingConnection();
         connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
         connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
+
+        QAudioFormat format;
+        format.setChannelCount(1);
+        format.setSampleRate(8000);
+        format.setSampleSize(8);
+        format.setCodec("audio/pcm");
+        format.setByteOrder(QAudioFormat::LittleEndian);
+        format.setSampleType(QAudioFormat::UnSignedInt);
+
+        QAudioInput *audio = new QAudioInput(format, this);
+        audio->setBufferSize(1024);
+        //audio->start(socket);
     }
     return 0;
 }

@@ -6,6 +6,8 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QBuffer>
+#include <QtMultimedia/QMediaPlayer>
+#include <QSound>
 
 namespace Ui
 {
@@ -33,9 +35,13 @@ private:
     QTcpSocket *tcpSocket = nullptr;
     QTcpSocket *peerSocket;
     QTcpServer *tcpServer;
+
     QByteArray data;
     QFile fileWrite;
     QFile fileRead;
+    QString filename;
+
     QAudioOutput* audio;
-    bool newFile = true;
+    QAudioFormat format;
+    bool streaming = false;
 };

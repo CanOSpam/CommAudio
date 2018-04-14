@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QAudioInput>
 #include <QAudioOutput>
+#include <QDataStream>
 
 namespace Ui
 {
@@ -27,5 +28,5 @@ private:
     QFileInfoList streamList;
     QFile file;
     QAudioOutput* audio;
-
+    QDataStream* dataStream;
 };
