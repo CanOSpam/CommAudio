@@ -16,7 +16,7 @@ class Server : public QWidget
 public:
     Server(QWidget *parent = Q_NULLPTR);
     ~Server();
-    addClient();
+    int addClient();
     void readData();
 
 private:

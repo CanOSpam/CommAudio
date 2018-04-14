@@ -21,7 +21,7 @@ public:
     ~Client();
     void readData();
     void displayError(QAbstractSocket::SocketError socketError);
-    peerConnRequest();
+    int peerConnRequest();
 
 private slots:
     void on_playButton_clicked();

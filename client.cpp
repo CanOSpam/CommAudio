@@ -142,7 +142,7 @@ void Client::on_connectButton_clicked()
     tcpSocket->connectToHost(QHostAddress(ipText),4242);
 }
 
-Client::peerConnRequest()
+int Client::peerConnRequest()
 {
     if (peerSocket == NULL)
     {

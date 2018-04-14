@@ -62,7 +62,7 @@ Server::~Server()
     tcpServer->close();
 }
 
-Server::addClient()
+int Server::addClient()
 {
     clientList.append(tcpServer->nextPendingConnection());
     connect(clientList.last(), &QAbstractSocket::disconnected, clientList.last(), &QObject::deleteLater);
