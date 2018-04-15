@@ -8,6 +8,7 @@
 #include <QBuffer>
 #include <QtMultimedia/QMediaPlayer>
 #include <QSound>
+#include <QFileDialog>
 
 namespace Ui
 {
@@ -33,6 +34,16 @@ private slots:
 
     void on_pauseButton_clicked();
 
+    void on_stopButton_clicked();
+
+    void on_downloadButton_clicked();
+
+    void on_stopLocalButton_clicked();
+
+    void on_pauseLocalButton_clicked();
+
+    void on_playLocalButton_clicked();
+
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;
@@ -41,9 +52,16 @@ private:
 
     QByteArray data;
     QString filename;
+    QDir OutputFolder;
+    QFile* downloadFile;
 
     QAudioOutput* audio;
     QAudioFormat format;
+    qint64 fileSize;
+
+    QMediaPlayer* player;
+
     bool streaming = false;
+    bool localPlaying = false;
     bool paused = false;
 };

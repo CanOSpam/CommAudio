@@ -25,7 +25,6 @@ private:
     QTcpServer *tcpServer;
     QString fileNames;
     QList<QTcpSocket*> clientList;
-    QList<QTcpSocket*> multicastList;
     QList<QDataStream*> dataStreamList;
     QFileInfoList streamList;
     QDataStream* dataStream;

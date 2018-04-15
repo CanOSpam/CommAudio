@@ -60,9 +60,10 @@ void Client::readData()
     if (!streaming)
     {
         // List of choices for client
-        data = tcpSocket->read(1);
+        data = tcpSocket->peek(1);
         if (data[0] == '0')
         {
+            data = tcpSocket->read(1);
             data = tcpSocket->readAll();
             QString* list = new QString(data);
             QList<QString> streamList = list->split(QRegExp(";"));
@@ -90,6 +91,20 @@ void Client::readData()
 
             }
         }
+        else
+        {
+            ui->playButton->setEnabled(false);
+            data = tcpSocket->readAll();
+            if (!downloadFile->isOpen())
+            {
+                if (!downloadFile->open(QIODevice::WriteOnly | QIODevice::Append))
+                        return;
+            }
+            downloadFile->write(data);
+
+            downloadFile->close();
+            ui->playButton->setEnabled(true);
+        }
     }
     else
     {
@@ -104,6 +119,7 @@ void Client::streamStateChange()
 {
     if (audio->state() != QAudio::ActiveState && tcpSocket->bytesAvailable() == 0)
     {
+        ui->downloadButton->setEnabled(true);
         streaming = false;
     }
 }
@@ -126,6 +142,7 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 
 void Client::on_playButton_clicked()
 {
+    ui->downloadButton->setEnabled(false);
     if (streaming)
     {
         audio->resume();
@@ -175,5 +192,80 @@ void Client::on_pauseButton_clicked()
     if (streaming)
     {
         audio->suspend();
+    }
+}
+
+void Client::on_stopButton_clicked()
+{
+    ui->downloadButton->setEnabled(true);
+    if (streaming)
+    {
+        audio->stop();
+        tcpSocket->readAll();
+        streaming = false;
+    }
+}
+
+void Client::on_downloadButton_clicked()
+{
+    ui->playButton->setEnabled(false);
+    OutputFolder = QFileDialog::getExistingDirectory(0, ("Select Output Folder"), QDir::currentPath());
+    QString header = "3";
+    header.append(ui->streamComboBox->currentText());
+    filename = ui->streamComboBox->currentText();
+    QFile* file = new QFile(OutputFolder.absolutePath() + "//" + filename);
+    if (file->isOpen())
+    {
+        file->close();
+    }
+    if (file->exists())
+    {
+        file->remove();
+    }
+    downloadFile = new QFile(OutputFolder.absolutePath() + "//" + filename);
+    if (!downloadFile->open(QIODevice::WriteOnly | QIODevice::Append))
+            return;
+
+    tcpSocket->write(qPrintable(header));
+}
+
+void Client::on_stopLocalButton_clicked()
+{
+    ui->downloadButton->setEnabled(true);
+    ui->playButton->setEnabled(true);
+    if (localPlaying)
+    {
+        player->stop();
+        localPlaying = false;
+    }
+}
+
+void Client::on_pauseLocalButton_clicked()
+{
+    if (localPlaying)
+    {
+        player->pause();
+    }
+}
+
+void Client::on_playLocalButton_clicked()
+{
+    ui->downloadButton->setEnabled(false);
+    ui->playButton->setEnabled(false);
+    if (localPlaying)
+    {
+        player->play();
+    }
+    else
+    {
+        QString name = QFileDialog::getOpenFileName(this,
+            tr("Open File"), "/", tr("Song Files (*.mp3 *.wav)"));
+
+        localPlaying = true;
+        player = new QMediaPlayer;
+        player->setMedia(QUrl::fromLocalFile(name));
+        player->setVolume(50);
+        player->play();
+
     }
 }
