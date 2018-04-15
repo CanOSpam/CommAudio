@@ -86,7 +86,6 @@ int Server::addClient()
     {
         clientList[i]->write(qPrintable(header));
     }
-
     return 0;
 }
 
@@ -102,12 +101,14 @@ void Server::readData()
             if (streamList[i].absoluteFilePath().contains(data))
             {
                 QFile *streamFile = new QFile(streamList[i].absoluteFilePath());
-                if (!streamFile->open(QIODevice::ReadOnly))
+                if (!streamFile->isOpen())
                 {
-                    return;
+                    if (!streamFile->open(QIODevice::ReadOnly))
+                    {
+                        return;
+                    }
                 }
                 dataStreamList.append(new QDataStream(socket));
-                dataStream = new QDataStream(socket);
 
                 QByteArray content = streamFile->readAll();
                 *dataStreamList.last() << content;
@@ -116,7 +117,7 @@ void Server::readData()
             }
         }
     }
-    if (data[0] == '3')
+    else if (data[0] == '3')
     {
         data = data.remove(0,1);
         for (int i = 0; i < streamList.size(); i++)
@@ -139,4 +140,50 @@ void Server::readData()
             }
         }
     }
+    else if (data[0] == '4')
+    {
+        for (int i = 0; i < multicastList.size(); i++)
+        {
+            if (multicastList[i]->localAddress().isEqual(socket->localAddress()))
+            {
+                multicastList.removeAt(i);
+            }
+        }
+        multicastList.append(socket);
+    }
+    else if (data[0] == '5')
+    {
+        for (int i = 0; i < multicastList.size(); i++)
+        {
+            if (multicastList[i]->localAddress().isEqual(socket->localAddress()))
+            {
+                multicastList.removeAt(i);
+            }
+        }
+    }
+}
+
+void Server::on_startMultiButton_clicked()
+{
+    QString name = QFileDialog::getOpenFileName(this,
+        tr("Open File"), "/", tr("Song Files (*.wav)"));
+
+    QFile *streamFile = new QFile(name);
+    if (!streamFile->isOpen())
+    {
+        if (!streamFile->open(QIODevice::ReadOnly))
+        {
+            return;
+        }
+    }
+
+    QByteArray content = streamFile->readAll();
+
+    for (int i = 0; i < multicastList.size(); i++)
+    {
+        dataStreamList.append(new QDataStream(multicastList[i]));
+
+        *dataStreamList.last() << content;
+    }
+    streamFile->close();
 }

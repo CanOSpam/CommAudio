@@ -57,7 +57,7 @@ Client::~Client()
 
 void Client::readData()
 {
-    if (!streaming)
+    if (!streaming && !multicast)
     {
         // List of choices for client
         data = tcpSocket->peek(1);
@@ -94,6 +94,7 @@ void Client::readData()
         else
         {
             ui->playButton->setEnabled(false);
+            ui->listenButton->setEnabled(false);
             data = tcpSocket->readAll();
             if (!downloadFile->isOpen())
             {
@@ -104,9 +105,10 @@ void Client::readData()
 
             downloadFile->close();
             ui->playButton->setEnabled(true);
+            ui->listenButton->setEnabled(true);
         }
     }
-    else
+    else if (streaming || multicast)
     {
         if ((audio->state() == QAudio::IdleState || audio->state() == QAudio::StoppedState))
         {
@@ -117,9 +119,10 @@ void Client::readData()
 
 void Client::streamStateChange()
 {
-    if (audio->state() != QAudio::ActiveState && tcpSocket->bytesAvailable() == 0)
+    if (audio->state() != QAudio::ActiveState && tcpSocket->bytesAvailable() == 0 && !multicast)
     {
         ui->downloadButton->setEnabled(true);
+        ui->listenButton->setEnabled(true);
         streaming = false;
     }
 }
@@ -143,6 +146,7 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 void Client::on_playButton_clicked()
 {
     ui->downloadButton->setEnabled(false);
+    ui->listenButton->setEnabled(false);
     if (streaming)
     {
         audio->resume();
@@ -198,6 +202,7 @@ void Client::on_pauseButton_clicked()
 void Client::on_stopButton_clicked()
 {
     ui->downloadButton->setEnabled(true);
+    ui->listenButton->setEnabled(true);
     if (streaming)
     {
         audio->stop();
@@ -209,6 +214,7 @@ void Client::on_stopButton_clicked()
 void Client::on_downloadButton_clicked()
 {
     ui->playButton->setEnabled(false);
+    ui->listenButton->setEnabled(false);
     OutputFolder = QFileDialog::getExistingDirectory(0, ("Select Output Folder"), QDir::currentPath());
     QString header = "3";
     header.append(ui->streamComboBox->currentText());
@@ -267,5 +273,32 @@ void Client::on_playLocalButton_clicked()
         player->setVolume(50);
         player->play();
 
+    }
+}
+
+void Client::on_listenButton_clicked()
+{
+    if (!streaming && !localPlaying)
+    {
+        multicast = true;
+        QString header = "4";
+        tcpSocket->write(qPrintable(header));
+        ui->playButton->setEnabled(false);
+        ui->downloadButton->setEnabled(false);
+    }
+}
+
+void Client::on_stopListenButton_clicked()
+{
+    if (!streaming && !localPlaying)
+    {
+        multicast = false;
+        QString header = "5";
+        tcpSocket->write(qPrintable(header));
+        ui->playButton->setEnabled(true);
+        ui->downloadButton->setEnabled(true);
+
+        audio->stop();
+        tcpSocket->readAll();
     }
 }

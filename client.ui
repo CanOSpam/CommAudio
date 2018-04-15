@@ -91,6 +91,32 @@
       <string>Download</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="listenButton">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>220</y>
+       <width>211</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Listen to Multicast</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="stopListenButton">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>300</y>
+       <width>211</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Stop Multicast</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="Local">
     <attribute name="title">

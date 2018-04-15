@@ -5,6 +5,7 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QDataStream>
+#include <QFileDialog>
 
 namespace Ui
 {
@@ -19,6 +20,9 @@ public:
     ~Server();
     int addClient();
     void readData();
+
+private slots:
+    void on_startMultiButton_clicked();
 
 private:
     Ui::Server *ui;

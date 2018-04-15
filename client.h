@@ -44,6 +44,10 @@ private slots:
 
     void on_playLocalButton_clicked();
 
+    void on_listenButton_clicked();
+
+    void on_stopListenButton_clicked();
+
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;
@@ -63,5 +67,6 @@ private:
 
     bool streaming = false;
     bool localPlaying = false;
+    bool multicast = false;
     bool paused = false;
 };
