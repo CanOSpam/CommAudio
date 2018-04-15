@@ -22,13 +22,16 @@ public:
     Client(QWidget *parent = Q_NULLPTR);
     ~Client();
     void readData();
+    void streamStateChange();
     void displayError(QAbstractSocket::SocketError socketError);
-    peerConnRequest();
+    int peerConnRequest();
 
 private slots:
     void on_playButton_clicked();
 
     void on_connectButton_clicked();
+
+    void on_pauseButton_clicked();
 
 private:
     Ui::Client *ui;
@@ -37,11 +40,10 @@ private:
     QTcpServer *tcpServer;
 
     QByteArray data;
-    QFile fileWrite;
-    QFile fileRead;
     QString filename;
 
     QAudioOutput* audio;
     QAudioFormat format;
     bool streaming = false;
+    bool paused = false;
 };

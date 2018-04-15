@@ -9,8 +9,6 @@ Client::Client(QWidget *parent)
     connect(tcpSocket, &QIODevice::readyRead, this, &Client::readData);
     connect(tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Client::displayError);
 
-    tcpSocket->abort();
-
     format.setSampleRate(96000);
     format.setChannelCount(1);
     format.setSampleSize(16);
@@ -24,6 +22,7 @@ Client::Client(QWidget *parent)
         format = info.nearestFormat(format);
     }
     audio = new QAudioOutput(format, this);
+    connect(audio, &QAudioOutput::stateChanged, this, &Client::streamStateChange);
 
     // The clients server for peer requests
     tcpServer = new QTcpServer(this);
@@ -61,12 +60,12 @@ void Client::readData()
     if (!streaming)
     {
         // List of choices for client
-        data = tcpSocket->readAll();
+        data = tcpSocket->read(1);
         if (data[0] == '0')
         {
-            QString *list = new QString(data);
-            QString fileString = list->remove(0,1);
-            QList<QString> streamList = fileString.split(QRegExp(";"));
+            data = tcpSocket->readAll();
+            QString* list = new QString(data);
+            QList<QString> streamList = list->split(QRegExp(";"));
             for (int i = 0; i <streamList.size(); i++)
             {
                 if (streamList[i].contains("/"))
@@ -91,43 +90,23 @@ void Client::readData()
 
             }
         }
-
-        // File data to play
-        else if (data[0] == '3')
-        {
-            streaming = true;
-    //        data = data.remove(0,1);
-    //        if(!fileWrite.isOpen())
-    //        {
-    //            fileWrite.open(QIODevice::ReadWrite | QIODevice::Append);
-    //        }
-    //        fileWrite.write(data);
-        }
-        //End of file
-    //    else if (data[0] == '4')
-    //    {
-    //        fileWrite.close();
-    //        fileRead.setFileName("./" + filename);
-    //        if(!fileRead.isOpen())
-    //        {
-    //            fileRead.open(QIODevice::ReadOnly);
-    //            qDebug("Opening fileRead\n");
-    //        }
-
-    //        audio = new QAudioOutput(format, this);
-    //        audio->start(&fileRead);
-    //    }
     }
     else
     {
-//        fileWrite.write(data);
-        if (audio->state() == QAudio::IdleState || audio->state() == QAudio::StoppedState)
+        if ((audio->state() == QAudio::IdleState || audio->state() == QAudio::StoppedState))
         {
             audio->start(tcpSocket);
         }
     }
 }
 
+void Client::streamStateChange()
+{
+    if (audio->state() != QAudio::ActiveState && tcpSocket->bytesAvailable() == 0)
+    {
+        streaming = false;
+    }
+}
 
 void Client::displayError(QAbstractSocket::SocketError socketError)
 {
@@ -147,12 +126,19 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 
 void Client::on_playButton_clicked()
 {
-    QString header = "2";
-    header.append(ui->streamComboBox->currentText());
-    filename = ui->streamComboBox->currentText();
-    fileWrite.setFileName("./" + filename);
-
-    tcpSocket->write(qPrintable(header));
+    if (streaming)
+    {
+        audio->resume();
+    }
+    else
+    {
+        QString header = "2";
+        header.append(ui->streamComboBox->currentText());
+        filename = ui->streamComboBox->currentText();
+        streaming = true;
+        paused = false;
+        tcpSocket->write(qPrintable(header));
+    }
 }
 
 void Client::on_connectButton_clicked()
@@ -161,7 +147,7 @@ void Client::on_connectButton_clicked()
     tcpSocket->connectToHost(QHostAddress(ipText),4242);
 }
 
-Client::peerConnRequest()
+int Client::peerConnRequest()
 {
     if (peerSocket == NULL)
     {
@@ -177,9 +163,17 @@ Client::peerConnRequest()
         format.setByteOrder(QAudioFormat::LittleEndian);
         format.setSampleType(QAudioFormat::UnSignedInt);
 
-        QAudioInput *audio = new QAudioInput(format, this);
+        //QAudioInput *audio = new QAudioInput(format, this);
         audio->setBufferSize(1024);
         //audio->start(socket);
     }
     return 0;
+}
+
+void Client::on_pauseButton_clicked()
+{
+    if (streaming)
+    {
+        audio->suspend();
+    }
 }

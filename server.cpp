@@ -39,6 +39,7 @@ Server::Server(QWidget *parent)
         close();
         return;
     }
+
     QString ipAddress;
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
     // use the first non-localhost IPv4 address
@@ -62,7 +63,7 @@ Server::~Server()
     tcpServer->close();
 }
 
-Server::addClient()
+int Server::addClient()
 {
     clientList.append(tcpServer->nextPendingConnection());
     connect(clientList.last(), &QAbstractSocket::disconnected, clientList.last(), &QObject::deleteLater);
@@ -100,10 +101,6 @@ void Server::readData()
         {
             if (streamList[i].absoluteFilePath().contains(data))
             {
-                QByteArray content;
-                content.prepend('3');
-                socket->write(content);
-
                 QFile *streamFile = new QFile(streamList[i].absoluteFilePath());
                 if (!streamFile->open(QIODevice::ReadOnly))
                 {
@@ -111,7 +108,7 @@ void Server::readData()
                 }
                 dataStream = new QDataStream(socket);
 
-                content = streamFile->readAll();
+                QByteArray content = streamFile->readAll();
                 *dataStream << content;
                 streamFile->close();
                 break;
