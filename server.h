@@ -16,12 +16,16 @@ class Server : public QWidget
 public:
     Server(QWidget *parent = Q_NULLPTR);
     ~Server();
-    addClient();
+    int addClient();
     void readData();
 
 private:
     Ui::Server *ui;
     QTcpServer *tcpServer;
     QString fileNames;
+    QList<QTcpSocket*> clientList;
     QFileInfoList streamList;
+    QFile file;
+    QAudioOutput* audio;
+
 };

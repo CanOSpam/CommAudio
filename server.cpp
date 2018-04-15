@@ -62,15 +62,30 @@ Server::~Server()
     tcpServer->close();
 }
 
-Server::addClient()
+int Server::addClient()
 {
-    QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
-    connect(clientConnection, &QAbstractSocket::disconnected, clientConnection, &QObject::deleteLater);
-    connect(clientConnection, &QIODevice::readyRead, this, &Server::readData);
+    clientList.append(tcpServer->nextPendingConnection());
+    connect(clientList.last(), &QAbstractSocket::disconnected, clientList.last(), &QObject::deleteLater);
+    connect(clientList.last(), &QIODevice::readyRead, this, &Server::readData);
 
     QByteArray header = fileNames.toUtf8();
     header.prepend('0');
-    clientConnection->write(qPrintable(header));
+    //clientList.last()->write(qPrintable(header));
+    header.append('1');
+    header.append(';');
+
+    QString ipNames;
+    for (int i = 0; i < clientList.size(); i++)
+    {
+        ipNames += clientList[i]->peerAddress().toString();
+        ipNames += ";";
+    }
+    header += ipNames.toUtf8();
+    for (int i = 0; i < clientList.size(); i++)
+    {
+        clientList[i]->write(qPrintable(header));
+    }
+
     return 0;
 }
 
@@ -78,7 +93,7 @@ void Server::readData()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender()); if (socket == 0) return;
     QString data(socket->readAll());
-    if (data[0] == '1')
+    if (data[0] == '2')
     {
         data = data.remove(0,1);
         for (int i = 0; i < streamList.size(); i++)
@@ -91,12 +106,13 @@ void Server::readData()
                     return;
                 }
 
-                QByteArray content = streamFile->readAll();
-                content.prepend('2');
-                socket->write(content);
-
+                while(!streamFile->atEnd())
+                {
+                    QByteArray content = streamFile->readLine();
+                    content.prepend('3');
+                    socket->write(content);
+                }
                 streamFile->close();
-
                 break;
             }
         }
