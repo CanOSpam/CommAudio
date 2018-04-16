@@ -37,7 +37,7 @@ private slots:
 
     void ConnectBack();
 
-    void RunMessageBox(QString ipAddress);
+    void RunMessageBox(QHostAddress ipAddress);
 
     void speaking();
     void on_pauseButton_clicked();

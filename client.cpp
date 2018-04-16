@@ -195,15 +195,14 @@ int Client::peerConnRequest()
         connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
         connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
 
-        QString ipofconnection = peerSocket->peerName();
-        qDebug() << "ipofconnection";
+        QHostAddress ipofconnection = peerSocket->peerAddress();
         RunMessageBox(ipofconnection);
     }
     return 0;
 }
 
 // Message Box When A client connects peer to peer for microphone
-void Client::RunMessageBox(QString ipAddress)
+void Client::RunMessageBox(QHostAddress ipAddress)
 {
     QMessageBox acceptConn;
     acceptConn.setText("You have received a p2p microphone request from: " + ipAddress);
@@ -228,6 +227,8 @@ void Client::RunMessageBox(QString ipAddress)
 // Connects back to the client if the client agrees
 void Client::ConnectBack()
 {
+    QHostAddress ipofconnection = peerSocket->peerAddress();
+    peerSocketOut->connectToHost(ipofconnection,8484);
     qDebug() << "Connected Back!";
 
 }
