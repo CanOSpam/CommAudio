@@ -195,17 +195,9 @@ int Client::peerConnRequest()
         connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
         connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
 
-        QAudioFormat format;
-        format.setChannelCount(1);
-        format.setSampleRate(8000);
-        format.setSampleSize(8);
-        format.setCodec("audio/pcm");
-        format.setByteOrder(QAudioFormat::LittleEndian);
-        format.setSampleType(QAudioFormat::UnSignedInt);
-
-        //QAudioInput *audio = new QAudioInput(format, this);
-        audio->setBufferSize(1024);
-        //audio->start(socket);
+        QString ipofconnection = peerSocket->peerName();
+        qDebug() << "ipofconnection";
+        RunMessageBox(ipofconnection);
     }
     return 0;
 }
@@ -222,6 +214,10 @@ void Client::RunMessageBox(QString ipAddress)
     {
         qDebug() << "Ok Pressed!";
         ConnectBack();
+        if (peerSocket != NULL && peerSocketOut != NULL)
+        {
+            speaking();
+        }
     }
     else if (acceptConn.exec() == QMessageBox::Cancel)
     {
@@ -233,17 +229,35 @@ void Client::RunMessageBox(QString ipAddress)
 void Client::ConnectBack()
 {
     qDebug() << "Connected Back!";
+
 }
 
 
-void Client::on_speakButton_clicked()
+void Client::speaking()
 {
     QMessageBox speak;
     speak.setText("2 way microphone enabled speak now!");
     speak.setStandardButtons(QMessageBox::Cancel);
+
+    QAudioFormat format;
+    format.setChannelCount(1);
+    format.setSampleRate(8000);
+    format.setSampleSize(8);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::UnSignedInt);
+
+    QAudioInput *audioin = new QAudioInput(format,this);
+    QAudioOutput *audioout = new QAudioOutput(format,this);
+
+    audioout->start(peerSocket);
+    audioin->start(peerSocketOut);
+
     speak.exec();
-    while (true)
-    {
+
+    peerSocket->disconnectFromHost();
+    peerSocketOut->disconnectFromHost();
+}
 
 void Client::on_pauseButton_clicked()
 {
