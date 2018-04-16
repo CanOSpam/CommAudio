@@ -4,6 +4,7 @@ Client::Client(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Client)
     , tcpSocket(new QTcpSocket(this))
+    , peerSocketOut(new QTcpSocket(this))
 {
     ui->setupUi(this);
     connect(tcpSocket, &QIODevice::readyRead, this, &Client::readData);
@@ -34,13 +35,14 @@ Client::Client(QWidget *parent)
     connect(tcpServer, &QTcpServer::newConnection, this, &Client::peerConnRequest);
     qDebug("The client server is running on\n\nIP: %s\nport: %d\n\n", qPrintable(ipAddress), tcpServer->serverPort());
 
-    tcpSocket->connectToHost(QHostAddress("192.168.56.1"),4242);
+    tcpSocket->connectToHost(QHostAddress("192.168.0.24"),4242);
 }
 
 Client::~Client()
 {
     delete ui;
 }
+
 
 void Client::readData()
 {
@@ -138,8 +140,13 @@ void Client::on_playButton_clicked()
 
 void Client::on_connectButton_clicked()
 {
+    peerSocketOut->disconnectFromHost();
+    //if (peerSocket->state() == QAbstractSocket::ConnectedState)
+    //{
+    //    peerSocket->disconnectFromHost();
+    //}
     QString ipText = ui->ipComboBox->currentText();
-    tcpSocket->connectToHost(QHostAddress(ipText),8484);
+    peerSocketOut->connectToHost(QHostAddress(ipText),8484);
     qDebug() << "Client Connected";
 }
 
@@ -150,6 +157,7 @@ void Client::on_disconnectButton_clicked()
     {
 
     }
+    RunMessageBox("test");
     qDebug() << "Client Disconnected";
 }
 
@@ -160,7 +168,6 @@ int Client::peerConnRequest()
         peerSocket = tcpServer->nextPendingConnection();
         connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
         connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
-        RunMessageBox("test");
     }
     return 0;
 }
@@ -172,10 +179,19 @@ void Client::RunMessageBox(QString ipAddress)
     acceptConn.setText("You have received a p2p microphone request from: " + ipAddress);
     acceptConn.setInformativeText("Accept Connection?");
     acceptConn.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    connect(&acceptConn, SIGNAL(buttonClicked(QMessageBox::Ok)),this,SLOT(ConnectBack()));
+
+    if (acceptConn.exec() == QMessageBox::Ok)
+    {
+        qDebug() << "Ok Pressed!";
+        ConnectBack();
+    }
+    else if (acceptConn.exec() == QMessageBox::Cancel)
+    {
+        qDebug() << "Cancel Pressed!";
+    }
 }
 
-// Connects back to the client if the
+// Connects back to the client if the client agrees
 void Client::ConnectBack()
 {
     qDebug() << "Connected Back!";

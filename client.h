@@ -38,7 +38,8 @@ private slots:
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;
-    QTcpSocket *peerSocket;
+    QTcpSocket *peerSocketOut = nullptr;
+    QTcpSocket *peerSocket = nullptr;
     QTcpServer *tcpServer;
     QByteArray data;
     QFile fileWrite;
