@@ -51,6 +51,8 @@ private slots:
 
     void on_stopListenButton_clicked();
 
+    void readVoice();
+
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;

@@ -177,7 +177,7 @@ void Client::on_connectButton_clicked()
 
     //peerSocketOut->disconnectFromHost();
     QString ipText = ui->ipComboBox->currentText();
-    peerSocketOut->connectToHost(QHostAddress(ipText),8484);
+    peerSocketOut->connectToHost(QHostAddress(ipText),8484, QIODevice::WriteOnly);
     audioin->start(peerSocketOut);
     qDebug() << "Client Connected";
 }
@@ -202,10 +202,17 @@ int Client::peerConnRequest()
         format.setSampleType(QAudioFormat::SignedInt);
 
         audioout = new QAudioOutput(format,this);
-        audioout->start(peerSocket);
-
+        connect(peerSocket, &QIODevice::readyRead, this, &Client::readVoice);
     }
     return 0;
+}
+
+void Client::readVoice()
+{
+    if ((audioout->state() == QAudio::IdleState || audioout->state() == QAudio::StoppedState))
+    {
+        audioout->start(peerSocket);
+    }
 }
 
 void Client::on_pauseButton_clicked()
