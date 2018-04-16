@@ -6,6 +6,7 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QBuffer>
+#include <QMessageBox>
 #include <QtMultimedia/QMediaPlayer>
 #include <QSound>
 #include <QFileDialog>
@@ -33,6 +34,8 @@ private slots:
 
     void on_connectButton_clicked();
 
+    void on_disconnectButton_clicked();
+
     void on_pauseButton_clicked();
 
     void on_stopButton_clicked();
@@ -49,10 +52,13 @@ private slots:
 
     void on_stopListenButton_clicked();
 
+    void readVoice();
+
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;
-    QTcpSocket *peerSocket;
+    QTcpSocket *peerSocketOut = nullptr;
+    QTcpSocket *peerSocket = nullptr;
     QTcpServer *tcpServer;
 
     QByteArray data;
@@ -65,6 +71,9 @@ private:
     qint64 fileSize;
 
     QMediaPlayer* player;
+
+    QAudioInput * audioin;
+    QAudioOutput * audioout;
 
     bool streaming = false;
     bool localPlaying = false;

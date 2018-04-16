@@ -4,6 +4,7 @@ Client::Client(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Client)
     , tcpSocket(new QTcpSocket(this))
+    , peerSocketOut(new QTcpSocket(this))
 {
     ui->setupUi(this);
     connect(tcpSocket, &QIODevice::readyRead, this, &Client::readData);
@@ -47,7 +48,6 @@ Client::Client(QWidget *parent)
     connect(tcpServer, &QTcpServer::newConnection, this, &Client::peerConnRequest);
     qDebug("The client server is running on\n\nIP: %s\nport: %d\n\n", qPrintable(ipAddress), tcpServer->serverPort());
 
-
     bool ok = false;
     QString ipAddr = QInputDialog::getText(this, tr("IP Address"),
                                                  tr("IP to connect to:"), QLineEdit::Normal,
@@ -60,6 +60,7 @@ Client::~Client()
 {
     delete ui;
 }
+
 
 void Client::readData()
 {
@@ -170,31 +171,53 @@ void Client::on_playButton_clicked()
 
 void Client::on_connectButton_clicked()
 {
+    format.setChannelCount(2);
+    format.setSampleRate(44100);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::SignedInt);
+
+    audioin = new QAudioInput(format,this);
+
+    //peerSocketOut->disconnectFromHost();
     QString ipText = ui->ipComboBox->currentText();
-    tcpSocket->connectToHost(QHostAddress(ipText),4242);
+    peerSocketOut->connectToHost(QHostAddress(ipText),8484, QIODevice::WriteOnly);
+    audioin->start(peerSocketOut);
+    qDebug() << "Client Connected";
+}
+
+void Client::on_disconnectButton_clicked()
+{
+    // Check if the socket is connected if it is disconnect
+    qDebug() << "Client Disconnected";
 }
 
 int Client::peerConnRequest()
 {
-    if (peerSocket == NULL)
+    if (peerSocket == nullptr)
     {
         peerSocket = tcpServer->nextPendingConnection();
-        connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
-        connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
 
-        QAudioFormat format;
-        format.setChannelCount(1);
-        format.setSampleRate(8000);
-        format.setSampleSize(8);
+        format.setChannelCount(2);
+        format.setSampleRate(44100);
+        format.setSampleSize(16);
         format.setCodec("audio/pcm");
         format.setByteOrder(QAudioFormat::LittleEndian);
-        format.setSampleType(QAudioFormat::UnSignedInt);
+        format.setSampleType(QAudioFormat::SignedInt);
 
-        //QAudioInput *audio = new QAudioInput(format, this);
-        audio->setBufferSize(1024);
-        //audio->start(socket);
+        audioout = new QAudioOutput(format,this);
+        connect(peerSocket, &QIODevice::readyRead, this, &Client::readVoice);
     }
     return 0;
+}
+
+void Client::readVoice()
+{
+    if ((audioout->state() == QAudio::IdleState || audioout->state() == QAudio::StoppedState))
+    {
+        audioout->start(peerSocket);
+    }
 }
 
 void Client::on_pauseButton_clicked()
