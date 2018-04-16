@@ -35,6 +35,8 @@ private slots:
 
     void RunMessageBox(QString ipAddress);
 
+    void speaking();
+
 private:
     Ui::Client *ui;
     QTcpSocket *tcpSocket = nullptr;

@@ -197,3 +197,15 @@ void Client::ConnectBack()
     qDebug() << "Connected Back!";
 }
 
+
+void Client::on_speakButton_clicked()
+{
+    QMessageBox speak;
+    speak.setText("2 way microphone enabled speak now!");
+    speak.setStandardButtons(QMessageBox::Cancel);
+    speak.exec();
+    while (true)
+    {
+
+    }
+}
