@@ -6,26 +6,8 @@ Server::Server(QWidget *parent)
 {
     ui->setupUi(this);
 
-    QDir *dataDir = new QDir(QDir::homePath());
-    streamList = dataDir->entryInfoList();
-    for(int i = 0; i < streamList.size(); i++)
-    {
-        if (streamList[i].absoluteFilePath().contains("Music"))
-        {
-            dataDir = new QDir(streamList[i].absoluteFilePath());
-            streamList = dataDir->entryInfoList();
-            break;
-        }
-    }
-    for(int i = 0; i < streamList.size(); i++)
-    {
-        if (streamList[i].absoluteFilePath().contains("Data"))
-        {
-            dataDir = new QDir(streamList[i].absoluteFilePath());
-            streamList = dataDir->entryInfoList();
-            break;
-        }
-    }
+    QDir dataDir = QDir(QFileDialog::getExistingDirectory(0, "Music Directory", QDir::currentPath()));
+    streamList = dataDir.entryInfoList();
 
     for(int i = 0; i < streamList.size(); i++)
     {
