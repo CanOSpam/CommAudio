@@ -74,7 +74,7 @@ void Client::readData()
                     QList<QString> sList = streamList[i].split("/");
                     for (int i = 0; i < sList.size(); i++)
                     {
-                        if (sList[i].contains(".wav") || sList[i].contains(".mp3"))
+                        if (sList[i].contains(".wav"))
                         {
                             ui->streamComboBox->addItem(sList[i]);
                         }
