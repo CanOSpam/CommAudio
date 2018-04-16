@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QAudioInput>
 #include <QAudioOutput>
+#include <QDataStream>
+#include <QFileDialog>
 
 namespace Ui
 {
@@ -19,13 +21,16 @@ public:
     int addClient();
     void readData();
 
+private slots:
+    void on_startMultiButton_clicked();
+
 private:
     Ui::Server *ui;
     QTcpServer *tcpServer;
     QString fileNames;
     QList<QTcpSocket*> clientList;
+    QList<QTcpSocket*> multicastList;
+    QList<QDataStream*> dataStreamList;
     QFileInfoList streamList;
-    QFile file;
-    QAudioOutput* audio;
-
+    QDataStream* dataStream;
 };

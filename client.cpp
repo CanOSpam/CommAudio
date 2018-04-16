@@ -9,7 +9,20 @@ Client::Client(QWidget *parent)
     connect(tcpSocket, &QIODevice::readyRead, this, &Client::readData);
     connect(tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Client::displayError);
 
-    tcpSocket->abort();
+    format.setSampleRate(96000);
+    format.setChannelCount(1);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::SignedInt);
+
+    QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+    if (!info.isFormatSupported(format)) {
+        qWarning() << "Default format not supported - trying to use nearest";
+        format = info.nearestFormat(format);
+    }
+    audio = new QAudioOutput(format, this);
+    connect(audio, &QAudioOutput::stateChanged, this, &Client::streamStateChange);
 
     // The clients server for peer requests
     tcpServer = new QTcpServer(this);
@@ -44,72 +57,73 @@ Client::~Client()
 
 void Client::readData()
 {
-    data = tcpSocket->readAll();
-    if (data[0] == '0')
+    if (!streaming && !multicast)
     {
-        QString *list = new QString(data);
-        QString fileString = list->remove(0,1);
-        QList<QString> streamList = fileString.split(QRegExp(";"));
-        for (int i = 0; i <streamList.size(); i++)
+        // List of choices for client
+        data = tcpSocket->peek(1);
+        if (data[0] == '0')
         {
-            if (streamList[i].contains("/"))
+            data = tcpSocket->read(1);
+            data = tcpSocket->readAll();
+            QString* list = new QString(data);
+            QList<QString> streamList = list->split(QRegExp(";"));
+            for (int i = 0; i <streamList.size(); i++)
             {
-                QList<QString> sList = streamList[i].split("/");
-                for (int i = 0; i < sList.size(); i++)
+                if (streamList[i].contains("/"))
                 {
-                    if (sList[i].contains(".wav") || sList[i].contains(".mp3"))
+                    QList<QString> sList = streamList[i].split("/");
+                    for (int i = 0; i < sList.size(); i++)
                     {
-                        ui->streamComboBox->addItem(sList[i]);
+                        if (sList[i].contains(".wav"))
+                        {
+                            ui->streamComboBox->addItem(sList[i]);
+                        }
                     }
                 }
-            }
-            else if (streamList[i].compare("1"))
-            {
-                for (int j = i; j < streamList.size() - 1;j++)
+                else if (streamList[i].compare("1"))
                 {
-                    ui->ipComboBox->addItem(streamList[j]);
+                    for (int j = i; j < streamList.size() - 1;j++)
+                    {
+                        ui->ipComboBox->addItem(streamList[j]);
+                    }
+                    break;
                 }
-                break;
-            }
 
+            }
+        }
+        else
+        {
+            ui->playButton->setEnabled(false);
+            ui->listenButton->setEnabled(false);
+            data = tcpSocket->readAll();
+            if (!downloadFile->isOpen())
+            {
+                if (!downloadFile->open(QIODevice::WriteOnly | QIODevice::Append))
+                        return;
+            }
+            downloadFile->write(data);
+
+            downloadFile->close();
+            ui->playButton->setEnabled(true);
+            ui->listenButton->setEnabled(true);
         }
     }
-
-    else if (data[0] == '3')
+    else if (streaming || multicast)
     {
-        data = data.remove(0,1);
-        fileWrite.setFileName("./test.wav");
-        if(!fileWrite.isOpen())
+        if ((audio->state() == QAudio::IdleState || audio->state() == QAudio::StoppedState))
         {
-            fileWrite.open(QIODevice::WriteOnly | QIODevice::Append);
+            audio->start(tcpSocket);
         }
-        fileWrite.write(data);
-        fileWrite.close();
-        if (newFile)
-        {
-            newFile = false;
-            fileRead.setFileName("./test.wav");
-            if(!fileRead.isOpen())
-            {
-                fileRead.open(QIODevice::ReadOnly);
-            }
-            QAudioFormat format;
-            format.setSampleRate(44100);
-            format.setChannelCount(1);
-            format.setSampleSize(16);
-            format.setCodec("audio/pcm");
-            format.setByteOrder(QAudioFormat::LittleEndian);
-            format.setSampleType(QAudioFormat::SignedInt);
+    }
+}
 
-            QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
-            if (!info.isFormatSupported(format)) {
-                qWarning() << "Default format not supported - trying to use nearest";
-                format = info.nearestFormat(format);
-            }
-            audio = new QAudioOutput(format, this);
-            audio->start(&fileRead);
-            fileRead.close();
-        }
+void Client::streamStateChange()
+{
+    if (audio->state() != QAudio::ActiveState && tcpSocket->bytesAvailable() == 0 && !multicast)
+    {
+        ui->downloadButton->setEnabled(true);
+        ui->listenButton->setEnabled(true);
+        streaming = false;
     }
 }
 
@@ -131,9 +145,21 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 
 void Client::on_playButton_clicked()
 {
-    QString header = "2";
-    header.append(ui->streamComboBox->currentText());
-    tcpSocket->write(qPrintable(header));
+    ui->downloadButton->setEnabled(false);
+    ui->listenButton->setEnabled(false);
+    if (streaming)
+    {
+        audio->resume();
+    }
+    else
+    {
+        QString header = "2";
+        header.append(ui->streamComboBox->currentText());
+        filename = ui->streamComboBox->currentText();
+        streaming = true;
+        paused = false;
+        tcpSocket->write(qPrintable(header));
+    }
 }
 
 void Client::on_connectButton_clicked()
@@ -149,6 +175,130 @@ int Client::peerConnRequest()
         peerSocket = tcpServer->nextPendingConnection();
         connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
         connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
+
+        QAudioFormat format;
+        format.setChannelCount(1);
+        format.setSampleRate(8000);
+        format.setSampleSize(8);
+        format.setCodec("audio/pcm");
+        format.setByteOrder(QAudioFormat::LittleEndian);
+        format.setSampleType(QAudioFormat::UnSignedInt);
+
+        //QAudioInput *audio = new QAudioInput(format, this);
+        audio->setBufferSize(1024);
+        //audio->start(socket);
     }
     return 0;
+}
+
+void Client::on_pauseButton_clicked()
+{
+    if (streaming)
+    {
+        audio->suspend();
+    }
+}
+
+void Client::on_stopButton_clicked()
+{
+    ui->downloadButton->setEnabled(true);
+    ui->listenButton->setEnabled(true);
+    if (streaming)
+    {
+        audio->stop();
+        tcpSocket->readAll();
+        streaming = false;
+    }
+}
+
+void Client::on_downloadButton_clicked()
+{
+    ui->playButton->setEnabled(false);
+    ui->listenButton->setEnabled(false);
+    OutputFolder = QFileDialog::getExistingDirectory(0, ("Select Output Folder"), QDir::currentPath());
+    QString header = "3";
+    header.append(ui->streamComboBox->currentText());
+    filename = ui->streamComboBox->currentText();
+    QFile* file = new QFile(OutputFolder.absolutePath() + "//" + filename);
+    if (file->isOpen())
+    {
+        file->close();
+    }
+    if (file->exists())
+    {
+        file->remove();
+    }
+    downloadFile = new QFile(OutputFolder.absolutePath() + "//" + filename);
+    if (!downloadFile->open(QIODevice::WriteOnly | QIODevice::Append))
+            return;
+
+    tcpSocket->write(qPrintable(header));
+}
+
+void Client::on_stopLocalButton_clicked()
+{
+    ui->downloadButton->setEnabled(true);
+    ui->playButton->setEnabled(true);
+    if (localPlaying)
+    {
+        player->stop();
+        localPlaying = false;
+    }
+}
+
+void Client::on_pauseLocalButton_clicked()
+{
+    if (localPlaying)
+    {
+        player->pause();
+    }
+}
+
+void Client::on_playLocalButton_clicked()
+{
+    ui->downloadButton->setEnabled(false);
+    ui->playButton->setEnabled(false);
+    if (localPlaying)
+    {
+        player->play();
+    }
+    else
+    {
+        QString name = QFileDialog::getOpenFileName(this,
+            tr("Open File"), "/", tr("Song Files (*.mp3 *.wav)"));
+
+        localPlaying = true;
+        player = new QMediaPlayer;
+        player->setMedia(QUrl::fromLocalFile(name));
+        player->setVolume(50);
+        player->play();
+
+    }
+}
+
+void Client::on_listenButton_clicked()
+{
+    if (!streaming && !localPlaying)
+    {
+        multicast = true;
+        QString header = "4";
+        tcpSocket->write(qPrintable(header));
+        ui->playButton->setEnabled(false);
+        ui->downloadButton->setEnabled(false);
+    }
+}
+
+void Client::on_stopListenButton_clicked()
+{
+    if (!streaming && !localPlaying)
+    {
+        multicast = false;
+        QString header = "5";
+        tcpSocket->write(qPrintable(header));
+        ui->playButton->setEnabled(true);
+        ui->downloadButton->setEnabled(true);
+
+        audio->stop();
+        tcpSocket->readAll();
+    }
 }

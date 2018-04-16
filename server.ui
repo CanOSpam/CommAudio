@@ -13,6 +13,19 @@
   <property name="windowTitle">
    <string>Audio Server</string>
   </property>
+  <widget class="QPushButton" name="startMultiButton">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>140</y>
+     <width>201</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start Multicast</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
