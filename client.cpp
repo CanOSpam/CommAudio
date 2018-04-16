@@ -166,11 +166,7 @@ void Client::on_playButton_clicked()
 
 void Client::on_connectButton_clicked()
 {
-    peerSocketOut->disconnectFromHost();
-    //if (peerSocket->state() == QAbstractSocket::ConnectedState)
-    //{
-    //    peerSocket->disconnectFromHost();
-    //}
+    //peerSocketOut->disconnectFromHost();
     QString ipText = ui->ipComboBox->currentText();
     peerSocketOut->connectToHost(QHostAddress(ipText),8484);
     qDebug() << "Client Connected";
@@ -184,11 +180,11 @@ void Client::on_disconnectButton_clicked()
 
 int Client::peerConnRequest()
 {
-    if (peerSocket == NULL)
+    if (peerSocket == nullptr)
     {
         peerSocket = tcpServer->nextPendingConnection();
-        connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
-        connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
+        //connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
+        //connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
 
         QHostAddress ipofconnection = peerSocket->peerAddress();
         RunMessageBox(ipofconnection);
@@ -208,7 +204,7 @@ void Client::RunMessageBox(QHostAddress ipAddress)
     {
         qDebug() << "Ok Pressed!";
         ConnectBack();
-        if (peerSocket != NULL && peerSocketOut != NULL)
+        if (peerSocket != nullptr && peerSocketOut != nullptr)
         {
             speaking();
         }
@@ -222,8 +218,13 @@ void Client::RunMessageBox(QHostAddress ipAddress)
 // Connects back to the client if the client agrees
 void Client::ConnectBack()
 {
+    disconnect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
+    disconnect(tcpSocket, &QIODevice::readyRead,this ,&Client::readData);
     QHostAddress ipofconnection = peerSocket->peerAddress();
-    peerSocketOut->connectToHost(ipofconnection,8484);
+    if (!peerSocketOut->isOpen())
+    {
+        peerSocketOut->connectToHost(ipofconnection,8484);
+    }
     qDebug() << "Connected Back!";
 
 }
@@ -236,12 +237,12 @@ void Client::speaking()
     speak.setStandardButtons(QMessageBox::Cancel);
 
     QAudioFormat format;
-    format.setChannelCount(1);
-    format.setSampleRate(8000);
-    format.setSampleSize(8);
+    format.setChannelCount(2);
+    format.setSampleRate(44100);
+    format.setSampleSize(16);
     format.setCodec("audio/pcm");
     format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setSampleType(QAudioFormat::UnSignedInt);
+    format.setSampleType(QAudioFormat::SignedInt);
 
     QAudioInput *audioin = new QAudioInput(format,this);
     QAudioOutput *audioout = new QAudioOutput(format,this);
