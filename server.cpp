@@ -39,6 +39,7 @@ Server::Server(QWidget *parent)
         close();
         return;
     }
+
     QString ipAddress;
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
     // use the first non-localhost IPv4 address
@@ -85,7 +86,6 @@ int Server::addClient()
     {
         clientList[i]->write(qPrintable(header));
     }
-
     return 0;
 }
 
@@ -101,15 +101,38 @@ void Server::readData()
             if (streamList[i].absoluteFilePath().contains(data))
             {
                 QFile *streamFile = new QFile(streamList[i].absoluteFilePath());
+                if (!streamFile->isOpen())
+                {
+                    if (!streamFile->open(QIODevice::ReadOnly))
+                    {
+                        return;
+                    }
+                }
+                dataStreamList.append(new QDataStream(socket));
+
+                QByteArray content = streamFile->readAll();
+                *dataStreamList.last() << content;
+                streamFile->close();
+                break;
+            }
+        }
+    }
+    else if (data[0] == '3')
+    {
+        data = data.remove(0,1);
+        for (int i = 0; i < streamList.size(); i++)
+        {
+            if (streamList[i].absoluteFilePath().contains(data))
+            {
+                QFile *streamFile = new QFile(streamList[i].absoluteFilePath());
                 if (!streamFile->open(QIODevice::ReadOnly))
                 {
                     return;
                 }
 
-                while(!streamFile->atEnd())
+                while (!streamFile->atEnd())
                 {
                     QByteArray content = streamFile->readLine();
-                    content.prepend('3');
                     socket->write(content);
                 }
                 streamFile->close();
@@ -117,4 +140,50 @@ void Server::readData()
             }
         }
     }
+    else if (data[0] == '4')
+    {
+        for (int i = 0; i < multicastList.size(); i++)
+        {
+            if (multicastList[i]->localAddress().isEqual(socket->localAddress()))
+            {
+                multicastList.removeAt(i);
+            }
+        }
+        multicastList.append(socket);
+    }
+    else if (data[0] == '5')
+    {
+        for (int i = 0; i < multicastList.size(); i++)
+        {
+            if (multicastList[i]->localAddress().isEqual(socket->localAddress()))
+            {
+                multicastList.removeAt(i);
+            }
+        }
+    }
+}
+
+void Server::on_startMultiButton_clicked()
+{
+    QString name = QFileDialog::getOpenFileName(this,
+        tr("Open File"), "/", tr("Song Files (*.wav)"));
+
+    QFile *streamFile = new QFile(name);
+    if (!streamFile->isOpen())
+    {
+        if (!streamFile->open(QIODevice::ReadOnly))
+        {
+            return;
+        }
+    }
+
+    QByteArray content = streamFile->readAll();
+
+    for (int i = 0; i < multicastList.size(); i++)
+    {
+        dataStreamList.append(new QDataStream(multicastList[i]));
+
+        *dataStreamList.last() << content;
+    }
+    streamFile->close();
 }
