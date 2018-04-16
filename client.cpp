@@ -47,7 +47,13 @@ Client::Client(QWidget *parent)
     connect(tcpServer, &QTcpServer::newConnection, this, &Client::peerConnRequest);
     qDebug("The client server is running on\n\nIP: %s\nport: %d\n\n", qPrintable(ipAddress), tcpServer->serverPort());
 
-    tcpSocket->connectToHost(QHostAddress("192.168.56.1"),4242);
+
+    bool ok = false;
+    QString ipAddr = QInputDialog::getText(this, tr("IP Address"),
+                                                 tr("IP to connect to:"), QLineEdit::Normal,
+                                                 "0.0.0.0", &ok);
+
+    tcpSocket->connectToHost(QHostAddress(ipAddr),4242);
 }
 
 Client::~Client()

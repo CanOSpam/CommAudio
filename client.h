@@ -9,6 +9,7 @@
 #include <QtMultimedia/QMediaPlayer>
 #include <QSound>
 #include <QFileDialog>
+#include <QInputDialog>
 
 namespace Ui
 {
