@@ -35,11 +35,6 @@ private slots:
 
     void on_disconnectButton_clicked();
 
-    void ConnectBack();
-
-    void RunMessageBox(QHostAddress ipAddress);
-
-    void speaking();
     void on_pauseButton_clicked();
 
     void on_stopButton_clicked();
@@ -73,6 +68,9 @@ private:
     qint64 fileSize;
 
     QMediaPlayer* player;
+
+    QAudioInput * audioin;
+    QAudioOutput * audioout;
 
     bool streaming = false;
     bool localPlaying = false;

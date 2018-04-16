@@ -166,9 +166,19 @@ void Client::on_playButton_clicked()
 
 void Client::on_connectButton_clicked()
 {
+    format.setChannelCount(2);
+    format.setSampleRate(44100);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::SignedInt);
+
+    audioin = new QAudioInput(format,this);
+
     //peerSocketOut->disconnectFromHost();
     QString ipText = ui->ipComboBox->currentText();
     peerSocketOut->connectToHost(QHostAddress(ipText),8484);
+    audioin->start(peerSocketOut);
     qDebug() << "Client Connected";
 }
 
@@ -183,77 +193,19 @@ int Client::peerConnRequest()
     if (peerSocket == nullptr)
     {
         peerSocket = tcpServer->nextPendingConnection();
-        //connect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
-        //connect(peerSocket, &QIODevice::readyRead, this, &Client::readData);
 
-        QHostAddress ipofconnection = peerSocket->peerAddress();
-        RunMessageBox(ipofconnection);
+        format.setChannelCount(2);
+        format.setSampleRate(44100);
+        format.setSampleSize(16);
+        format.setCodec("audio/pcm");
+        format.setByteOrder(QAudioFormat::LittleEndian);
+        format.setSampleType(QAudioFormat::SignedInt);
+
+        audioout = new QAudioOutput(format,this);
+        audioout->start(peerSocket);
+
     }
     return 0;
-}
-
-// Message Box When A client connects peer to peer for microphone
-void Client::RunMessageBox(QHostAddress ipAddress)
-{
-    QMessageBox acceptConn;
-    acceptConn.setText("You have received a p2p microphone request from: ");
-    acceptConn.setInformativeText("Accept Connection?");
-    acceptConn.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-
-    if (acceptConn.exec() == QMessageBox::Ok)
-    {
-        qDebug() << "Ok Pressed!";
-        ConnectBack();
-        if (peerSocket != nullptr && peerSocketOut != nullptr)
-        {
-            speaking();
-        }
-    }
-    else if (acceptConn.exec() == QMessageBox::Cancel)
-    {
-        qDebug() << "Cancel Pressed!";
-    }
-}
-
-// Connects back to the client if the client agrees
-void Client::ConnectBack()
-{
-    disconnect(peerSocket, &QAbstractSocket::disconnected, peerSocket, &QObject::deleteLater);
-    disconnect(tcpSocket, &QIODevice::readyRead,this ,&Client::readData);
-    QHostAddress ipofconnection = peerSocket->peerAddress();
-    if (!peerSocketOut->isOpen())
-    {
-        peerSocketOut->connectToHost(ipofconnection,8484);
-    }
-    qDebug() << "Connected Back!";
-
-}
-
-
-void Client::speaking()
-{
-    QMessageBox speak;
-    speak.setText("2 way microphone enabled speak now!");
-    speak.setStandardButtons(QMessageBox::Cancel);
-
-    QAudioFormat format;
-    format.setChannelCount(2);
-    format.setSampleRate(44100);
-    format.setSampleSize(16);
-    format.setCodec("audio/pcm");
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setSampleType(QAudioFormat::SignedInt);
-
-    QAudioInput *audioin = new QAudioInput(format,this);
-    QAudioOutput *audioout = new QAudioOutput(format,this);
-
-    audioout->start(peerSocket);
-    audioin->start(peerSocketOut);
-
-    speak.exec();
-
-    peerSocket->disconnectFromHost();
-    peerSocketOut->disconnectFromHost();
 }
 
 void Client::on_pauseButton_clicked()
