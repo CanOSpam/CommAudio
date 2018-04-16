@@ -200,7 +200,7 @@ int Client::peerConnRequest()
 void Client::RunMessageBox(QHostAddress ipAddress)
 {
     QMessageBox acceptConn;
-    acceptConn.setText("You have received a p2p microphone request from: " + ipAddress);
+    acceptConn.setText("You have received a p2p microphone request from: ");
     acceptConn.setInformativeText("Accept Connection?");
     acceptConn.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 
