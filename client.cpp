@@ -179,11 +179,6 @@ void Client::on_connectButton_clicked()
 void Client::on_disconnectButton_clicked()
 {
     // Check if the socket is connected if it is disconnect
-    if (tcpSocket->state() == QAbstractSocket::ConnectedState)
-    {
-
-    }
-    RunMessageBox("test");
     qDebug() << "Client Disconnected";
 }
 
