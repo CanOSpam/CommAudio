@@ -9,28 +9,28 @@
 
 namespace Ui
 {
-    class Server;
+class Server;
 }
 
 class Server : public QWidget
 {
-    Q_OBJECT
+Q_OBJECT
 public:
-    Server(QWidget *parent = Q_NULLPTR);
-    ~Server();
-    int addClient();
-    void readData();
+Server(QWidget *parent = Q_NULLPTR);
+~Server();
+int addClient();
+void readData();
 
 private slots:
-    void on_startMultiButton_clicked();
+void on_startMultiButton_clicked();
 
 private:
-    Ui::Server *ui;
-    QTcpServer *tcpServer;
-    QString fileNames;
-    QList<QTcpSocket*> clientList;
-    QList<QTcpSocket*> multicastList;
-    QList<QDataStream*> dataStreamList;
-    QFileInfoList streamList;
-    QDataStream* dataStream;
+Ui::Server *ui;
+QTcpServer *tcpServer;
+QString fileNames;
+QList<QTcpSocket*> clientList;
+QList<QTcpSocket*> multicastList;
+QList<QDataStream*> dataStreamList;
+QFileInfoList streamList;
+QDataStream* dataStream;
 };

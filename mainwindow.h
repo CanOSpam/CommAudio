@@ -10,24 +10,24 @@
 
 namespace Ui
 {
-    class MainWindow;
+class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = Q_NULLPTR);
-    ~MainWindow();
+explicit MainWindow(QWidget *parent = Q_NULLPTR);
+~MainWindow();
 
 private:
-    Ui::MainWindow *ui;
-    Server *serverWindow;
-    Client *clientWindow[32];
-    int maxClients;
-    int currClients;
+Ui::MainWindow *ui;
+Server *serverWindow;
+Client *clientWindow[32];
+int maxClients;
+int currClients;
 
-    void clientPressed();
-    void serverPressed();
+void clientPressed();
+void serverPressed();
 };
