@@ -48,9 +48,9 @@ MainWindow::MainWindow(QWidget *parent) :
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Tim Bruecker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Tim Bruecker
    --
    -- INTERFACE: MainWindow::~MainWindow()
    --
@@ -80,9 +80,9 @@ MainWindow::~MainWindow()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Tim Bruecker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Tim Bruecker
    --
    -- INTERFACE: void MainWindow::serverPressed()
    --
@@ -105,9 +105,9 @@ void MainWindow::serverPressed()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Tim Bruecker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Tim Bruecker
    --
    -- INTERFACE: void MainWindow::clientPressed()
    --

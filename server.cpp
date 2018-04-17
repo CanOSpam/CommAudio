@@ -69,9 +69,9 @@ Server::Server(QWidget *parent)
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: Server::~Server()
    --
@@ -94,9 +94,9 @@ Server::~Server()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: int Server::addClient()
    --
@@ -141,9 +141,9 @@ int Server::addClient()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Server::readData()
    --
@@ -234,7 +234,7 @@ void Server::readData()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
    -- PROGRAMMER:
    --
@@ -264,13 +264,7 @@ void Server::on_startMultiButton_clicked()
         for (int i = 0; i < multicastList.size(); i++)
         {
                 qDebug() << multicastList.size();
-                //dataStreamList.append(new QDataStream(multicastList[i]));
                 multicastList[i]->write(content);
         }
-
-//    for(int i = 0; i < dataStreamList.size(); i++)
-//    {
-//        *dataStreamList[i] << content;
-//    }
         streamFile->close();
 }

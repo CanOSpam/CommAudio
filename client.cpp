@@ -98,9 +98,9 @@ Client::Client(QWidget *parent)
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: Client::~Client()
    --
@@ -122,9 +122,9 @@ Client::~Client()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::readData()
    --
@@ -204,9 +204,9 @@ void Client::readData()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::streamStateChange()
    --
@@ -233,9 +233,9 @@ void Client::streamStateChange()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::displayError(QAbstractSocket::SocketError socketError)
    --
@@ -269,9 +269,9 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_playButton_clicked()
    --
@@ -307,9 +307,9 @@ void Client::on_playButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker, Tim Bruecker, Alfred Swinton
    --
    -- INTERFACE: void Client::on_connectButton_clicked()
    --
@@ -344,9 +344,9 @@ void Client::on_connectButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_disconnectButton_clicked()
    --
@@ -369,9 +369,9 @@ void Client::on_disconnectButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker, Mac Craig, Alfred Swinton
    --
    -- INTERFACE: int Client::peerConnRequest()
    --
@@ -408,9 +408,9 @@ int Client::peerConnRequest()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Alfred Swinton
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Alfred Swinton
    --
    -- INTERFACE: void Client::readVoice()
    --
@@ -435,9 +435,9 @@ void Client::readVoice()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_pauseButton_clicked()
    --
@@ -462,9 +462,9 @@ void Client::on_pauseButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_stopButton_clicked()
    --
@@ -493,9 +493,9 @@ void Client::on_stopButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_downloadButton_clicked()
    --
@@ -536,9 +536,9 @@ void Client::on_downloadButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_stopLocalButton_clicked()
    --
@@ -566,9 +566,9 @@ void Client::on_stopLocalButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_pauseLocalButton_clicked()
    --
@@ -593,9 +593,9 @@ void Client::on_pauseLocalButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_playLocalButton_clicked()
    --
@@ -634,9 +634,9 @@ void Client::on_playLocalButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_listenButton_clicked()
    --
@@ -665,9 +665,9 @@ void Client::on_listenButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER:
+   -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker
    --
    -- INTERFACE: void Client::on_stopListenButton_clicked()
    --
