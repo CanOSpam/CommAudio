@@ -74,7 +74,8 @@ int Server::addClient()
 void Server::readData()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender()); if (socket == 0) return;
-    QString data(socket->readAll());
+    QString data = socket->readAll();
+    qDebug() << "data: " << data;
     if (data[0] == '2')
     {
         data = data.remove(0,1);
@@ -124,14 +125,8 @@ void Server::readData()
     }
     else if (data[0] == '4')
     {
-        for (int i = 0; i < multicastList.size(); i++)
-        {
-            if (multicastList[i]->localAddress().isEqual(socket->localAddress()))
-            {
-                multicastList.removeAt(i);
-            }
-        }
         multicastList.append(socket);
+        qDebug() << "Added " << socket;
     }
     else if (data[0] == '5')
     {
@@ -139,7 +134,8 @@ void Server::readData()
         {
             if (multicastList[i]->localAddress().isEqual(socket->localAddress()))
             {
-                multicastList.removeAt(i);
+               qDebug() << "(5) Removing: " << multicastList[i];
+               multicastList.removeAt(i);
             }
         }
     }
@@ -163,9 +159,14 @@ void Server::on_startMultiButton_clicked()
 
     for (int i = 0; i < multicastList.size(); i++)
     {
-        dataStreamList.append(new QDataStream(multicastList[i]));
-
-        *dataStreamList.last() << content;
+        qDebug() << multicastList.size();
+        //dataStreamList.append(new QDataStream(multicastList[i]));
+        multicastList[i]->write(content);
     }
+
+//    for(int i = 0; i < dataStreamList.size(); i++)
+//    {
+//        *dataStreamList[i] << content;
+//    }
     streamFile->close();
 }
