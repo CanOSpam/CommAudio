@@ -96,7 +96,7 @@ Server::~Server()
    --
    -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER: Haley Booker
+   -- PROGRAMMER: Haley Booker, Alfread Swinton
    --
    -- INTERFACE: int Server::addClient()
    --
@@ -143,7 +143,7 @@ int Server::addClient()
    --
    -- DESIGNER: Haley Booker
    --
-   -- PROGRAMMER: Haley Booker
+   -- PROGRAMMER: Haley Booker, Tim Bruecker
    --
    -- INTERFACE: void Server::readData()
    --
@@ -234,9 +234,9 @@ void Server::readData()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER: Haley Booker
+   -- DESIGNER: Haley Booker, Mac Craig
    --
-   -- PROGRAMMER:
+   -- PROGRAMMER: Haley Booker, Mac Craig
    --
    -- INTERFACE: void Server::on_startMultiButton_clicked()
    --

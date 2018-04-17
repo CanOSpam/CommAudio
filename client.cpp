@@ -122,9 +122,9 @@ Client::~Client()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER: Haley Booker
+   -- DESIGNER: Haley Booker, Mac Craig
    --
-   -- PROGRAMMER: Haley Booker
+   -- PROGRAMMER: Haley Booker, Mac Craig
    --
    -- INTERFACE: void Client::readData()
    --
@@ -233,9 +233,9 @@ void Client::streamStateChange()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER: Haley Booker
+   -- DESIGNER: Haley Booker, Alfred Swinton
    --
-   -- PROGRAMMER: Haley Booker
+   -- PROGRAMMER: Haley Booker, Alfred Swinton
    --
    -- INTERFACE: void Client::displayError(QAbstractSocket::SocketError socketError)
    --
@@ -269,9 +269,9 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER: Haley Booker
+   -- DESIGNER: Haley Booker, Mac Craig
    --
-   -- PROGRAMMER: Haley Booker
+   -- PROGRAMMER: Haley Booker, Mac Craig
    --
    -- INTERFACE: void Client::on_playButton_clicked()
    --
@@ -593,9 +593,9 @@ void Client::on_pauseLocalButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER: Haley Booker
+   -- DESIGNER: Haley Booker, Alfred Swinton
    --
-   -- PROGRAMMER: Haley Booker
+   -- PROGRAMMER: Haley Booker, Alfred Swinton
    --
    -- INTERFACE: void Client::on_playLocalButton_clicked()
    --
@@ -634,9 +634,9 @@ void Client::on_playLocalButton_clicked()
    -- REVISIONS: (Date and Description)
    -- N/A
    --
-   -- DESIGNER: Haley Booker
+   -- DESIGNER: Haley Booker, Mac Craig
    --
-   -- PROGRAMMER: Haley Booker
+   -- PROGRAMMER: Haley Booker, Mac Craig
    --
    -- INTERFACE: void Client::on_listenButton_clicked()
    --
